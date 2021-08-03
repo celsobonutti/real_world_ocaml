@@ -1,0 +1,3 @@
+(executable
+  (name       lists_and_patterns)
+  (libraries  base stdio))
