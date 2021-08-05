@@ -1,0 +1,4 @@
+(executable
+  (name       records)
+  (libraries  core stdio re)
+  (preprocess (pps ppx_jane)))
