@@ -4,16 +4,26 @@ type service_info =
   { service_name  : string;
     port          : int;
     protocol      : string;
+    comment       : string option;
   }
 
 let service_info_of_string line =
+  (* first, split off any comment *)
+  let (line, comment) =
+    match String.rsplit2 line ~on:'#' with
+    | None -> (line, None)
+    | Some (ordinary, comment) -> (ordinary, Some comment)
+  in
   let matches =
-    let pat = "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)" in
-    Re.exec (Re.Posix.compile_pat pat) line
-in
-{ service_name = Re.Group.get matches 1;
-  port = Int.of_string (Re.Group.get matches 2);
-  protocol = Re.Group.get matches 3;
+    Re.exec (Re.Posix.compile_pat "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)") line
+  in
+  let service_name = Re.Group.get matches 1 in
+  let port = Int.of_string (Re.Group.get matches 2) in
+  let protocol = Re.Group.get matches 3 in
+{ service_name;
+  port;
+  protocol;
+  comment
 }
 
 type 'a with_line_number = { item: 'a; line_num: int }
@@ -28,6 +38,12 @@ let _: service_info with_line_number list  = parse_lines service_info_of_string
     "rtmp           1/ddp       # Routine Table Maintenance Protocol
      tcpmux         1/udp       # TCP Port Service Multiplexer
      tcpmux         1/tcp       # TCP Port Service Multiplexer"
+
+let service_info_to_string { service_name = name; port = port; protocol = prot; _ } =
+  sprintf "%s %i/%s" name port prot
+
+let create_service_info ~service_name ~port ~protocol ~comment =
+  { service_name; port; protocol; comment }
 
 module Log_entry = struct
   type t =
