@@ -106,6 +106,13 @@ let show_field field to_string record =
   let field_string = to_string (Field.get field record) in
   name ^ ": " ^ field_string
 
+let logon = { Logon.
+              session_id = "26685";
+              time = Time_ns.of_string "2017-07-21 10:11:45 EST";
+              user = "yminsky";
+              credentials = "Xy2d9W";
+            }
+
 let print_logon logon =
   let print to_string field =
     printf "%s\n" (show_field field to_string logon)
